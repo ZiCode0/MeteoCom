@@ -1,20 +1,19 @@
-from schema import Schema, And, Or, Optional, SchemaError
+from schema import Schema, And, Optional, SchemaError
 
 from lib.mapping.address import check_address
 
 command_int_limit = 10
-record_schema = Schema({  # 'address': And(int),
-    # 'function': Or(lambda s: check_function_key(s)),
+record_schema = Schema({
     'address': And(str, lambda s: check_address(s)),
     'read_type': And(str, lambda s: check_result_key(s)),
-    # Optional('key'): And(str),
+    Optional('divide'): And(int),
     Optional('description'): And(str),
     Optional('write'): And(hex, int)
-    # Optional('active'): And(True)
 })
 
 header_schema = Schema({'device_name': And(str),
                         'protocol': And(str),
+                        'slave_address': And(int),
                         'rate': And(int)
                         })
 

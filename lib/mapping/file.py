@@ -7,7 +7,7 @@ from lib.mapping import address
 
 def read(file_path):
     """
-    Reading device mapper config
+    Reading device mapper configs
     :return:
     """
     config_file = open(file_path, 'r')
@@ -18,13 +18,14 @@ def read(file_path):
 
 def dump_map(header, data, out_file=None, empty_field=''):
     """
-    Dump device mapper data to json config
+    Dump device mapper data to json configs
     :return:
     """
     # init result map dict instance
     result_map = {'info': {'device_name': header[0],
                            'protocol': header[1],
-                           'rate': int(header[2])},
+                           'slave_address': int(header[2]),
+                           'rate': int(header[3])},
                   'data': {}}
     counter = 1
     for record in data:
@@ -39,7 +40,7 @@ def dump_map(header, data, out_file=None, empty_field=''):
         result_map['data'][str(counter)] = res_record  # .append(res_record)
         counter += 1
 
-    # make config head
+    # make configs head
     result_map = {'device_mapper': result_map}
 
     # try validate result output
