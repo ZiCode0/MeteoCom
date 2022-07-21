@@ -3,15 +3,16 @@ import datetime
 import time
 from pathlib import Path
 
-from lib.tasker import task_line
+from lib.tasker import task_args
 from lib.config import config
 
 conf = config.EnvConfig()
 
 '''
 TASK EXAMPLE:
-    {"task_type": "read",
-    "task_line": "{datetime} {temp1} {temp2} {press1} {press2}",
+    {"enabled": True
+    "task_type": "read",
+    "task_args": "{datetime} {temp1} {temp2} {press1} {press2}",
     "task_repeat": 2,
     "report_name": "{device_name}_{datetime}",
     "report_path": "default",
@@ -19,16 +20,18 @@ TASK EXAMPLE:
 '''
 
 
-def get_set_data(args, modbus_server, device_mapper):
+def get_set_data(args, modbus_server, device_mapper, once_fail_run=False, logger=None):
     """
     Once task function
     :param device_mapper:
     :param args:
     :param modbus_server:
+    :param once_fail_run: No restart after fail
+    :param logger: logger instance
     :return:
     """
     # prepare data
-    targets = task_line.prepare(target_line=args['task_line'],
+    targets = task_args.prepare(target_line=args['task_args'],
                                 task_type=args['task_type'],
                                 device_mapper=device_mapper)
 
@@ -47,6 +50,9 @@ def get_set_data(args, modbus_server, device_mapper):
                 result_dict[name] = modbus_server.read_data(register=targets[name]['register'],
                                                             function=targets[name]['function'],
                                                             read_type=targets[name]['read_type'])
+                if targets[name]['divide']:
+                    result_dict[name] = result_dict[name] / 10
+                # print()
         # print()  # enable for #debug
         return result_dict
 
@@ -76,46 +82,55 @@ def get_set_data(args, modbus_server, device_mapper):
         result = target_func()
         return result
     except Exception as ex:
-        print(f'[!] Error in task: <{ex}>, repeat..')
-        # exception try loop
-        # try with sleep timer while success
-        while True:
-            try:
-                time.sleep(random.uniform(0.01, 0.5))  # random wait on exception to pause
-                result = target_func()
-                return result
-            except:
-                continue
+        if once_fail_run:
+            raise ex
+        else:
+            ex_text = f'Error in task: <{ex}>, repeat..'
+            if logger:
+                logger.warning(ex_text)
+            else:
+                print('[!]' + ex_text)
+            # exception try loop
+            # try with sleep timer while success
+            while True:
+                try:
+                    time.sleep(random.uniform(0.1, 0.5))  # random wait on exception to pause
+                    result = target_func()
+                    return result
+                except:
+                    continue
 
 
-def make_export_path(task_args: dict,
+def make_export_path(i_task_args: dict,
                      d_mapper):
     """
     Make export path using task parameters
-    :param task_args: task arguments dictionary
+    :param i_task_args: task arguments dictionary
     :param d_mapper: Device mapper instance
     :return:
     """
     export_path = {}
     # prepare export path
-    if task_args['report_path'] == 'default':
+    if i_task_args['report_path'] == 'default':
         export_path['report_path'] = Path('./')  # change path to default value
     else:
-        export_path['report_path'] = Path(task_args['report_path'])
+        export_path['report_path'] = Path(i_task_args['report_path'])
 
     # prepare export file name
-    report_keys = task_line.parse_read_line(task_args['report_name'])
+    report_keys = task_args.parse_read_line(i_task_args['report_name'])
     for name in report_keys:
         if name == 'datetime':
-            report_keys[name] = datetime.datetime.now().strftime(conf.default.export_time_format)
+            report_keys[name] = datetime.datetime.now().strftime(conf.default.export_filename_time_format)
         elif name == 'device_name':
             report_keys[name] = d_mapper.map['info']['device_name']
-    export_path['report_name'] = task_args['report_name'].format(**report_keys)
+        elif name == 'task_name':
+            report_keys[name] = i_task_args['task_name']
+    export_path['report_name'] = i_task_args['report_name'].format(**report_keys)
 
     # prepare export file extension (.txt, .xlsx)
-    if task_args['report_type'] in ['text', 'txt']:
+    if i_task_args['report_type'] in ['text', 'txt']:
         export_path['report_type'] = '.txt'
-    elif task_args['report_type'] in ['excel', 'xls', 'xlsx']:
+    elif i_task_args['report_type'] in ['excel', 'xls', 'xlsx']:
         export_path['report_type'] = '.xlsx'
 
     # form result export file Path

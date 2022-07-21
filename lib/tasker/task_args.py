@@ -56,7 +56,7 @@ def prepare(target_line, device_mapper, task_type):
                 if dm_key == arg:
                     # fill rules from mapper dictionary
                     args[arg] = device_mapper.map['data'][dm_key]
-                    # split address address => read_function:register
+                    # split address => read_function:register
                     split_addr = split_address(args[arg]['address'])
                     # update task map dictionary
                     args[arg].update(split_addr)
@@ -78,7 +78,7 @@ def prepare(target_line, device_mapper, task_type):
                 if dm_key == arg:
                     # fill rules from mapper dictionary
                     read_args[arg] = device_mapper.map['data'][dm_key]
-                    # split address address => read_function:register
+                    # split address => read_function:register
                     split_addr = split_address(read_args[arg]['address'])
                     # update task map dictionary
                     read_args[arg].update(split_addr)
