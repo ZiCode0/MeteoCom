@@ -1,6 +1,6 @@
 import sys
 
-from lib.modbus.server import MServer
+from lib.modbus.mb_server import MServer
 from lib.mapping import file
 from lib.report import table
 from lib import strings
@@ -16,6 +16,7 @@ skip_empty = True  # skip empty registers
 
 
 def rtu_parser(port=PORT,
+               slave_address=1,
                rate=RATE,
                out_path=DEFAULT_PATH,
                device_name=DEVICE_NAME,
@@ -25,6 +26,7 @@ def rtu_parser(port=PORT,
     """
     Modbus parser to build device map
     :param port: target device connection port
+    :param slave_address: target slave address to connect device
     :param rate: target device connection rate
     :param out_path: result output file with json device map
     :param device_name: device name for map
@@ -39,7 +41,7 @@ def rtu_parser(port=PORT,
     if out_path is None:
         out_path = DEFAULT_PATH
 
-    s = MServer(port, rate, read_mode=read_mode, **kwargs)  # init modbus server instance
+    s = MServer(port, rate, slave_address=slave_address, read_mode=read_mode, **kwargs)  # init modbus server instance
 
     # parse registers
     table_buffer = []
@@ -69,6 +71,9 @@ def rtu_parser(port=PORT,
 
                 if type(ss_flt) == float:
                     ss_flt = f'{ss_flt:.2f}'
+                # debug
+                # print(index, str(hex(index)), func, ss_reg, ss_flt, ss_lng, ss_bit)
+                # add record to output table
                 table_buffer.append([index, str(hex(index)), func, ss_reg, ss_flt, ss_lng, ss_bit])
 
             except Exception as ex:
@@ -86,8 +91,8 @@ def rtu_parser(port=PORT,
     # prepare data to export
     table_buffer = t.export(exclude_column=1)  # remove_dot_separator(data_array=table_buffer)
 
-    # add header for json config dump
-    header = [device_name, 'rtu', rate]
+    # add header for json configs dump
+    header = [device_name, 'rtu', slave_address, rate]
     # dump to json
     file.dump_map(header=header, data=table_buffer, out_file=out_path)
 
@@ -98,6 +103,7 @@ def rtu_parser(port=PORT,
 if __name__ == '__main__':
     # sys.args
     rtu_parser(port=sys.argv[1],
-               rate=int(sys.argv[2]),
-               device_name=sys.argv[3],
-               out_path=sys.argv[4])
+               slave_address=int(sys.argv[2]),
+               rate=int(sys.argv[3]),
+               device_name=sys.argv[4],
+               out_path=sys.argv[5])
