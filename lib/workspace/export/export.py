@@ -4,7 +4,7 @@ from io import StringIO
 from sqlalchemy import create_engine
 
 
-def to_db(data, engine=None, table_name=None,
+def to_db(data, engine=None, db_path=None, table_name=None,
           db_driver=None, db_host=None, db_port=None,
           db_user=None, db_pass=None, db_name=None):
     """
@@ -15,10 +15,11 @@ def to_db(data, engine=None, table_name=None,
     if db_port:
         db_port = ':' + db_port
     else:
-        db_port = ':'
+        db_port = ''
     # init connection if empty engine
     if not engine:
-        engine = create_engine(f'{db_driver}://{db_user}:{db_pass}@{db_host}{db_port}/{db_name}')
+        engine = create_engine(db_path)
+        # engine = create_engine(f'{db_driver}://{db_user}:{db_pass}@{db_host}{db_port}/{db_name}')
     # transfer data to db
     data.to_sql(table_name, con=engine, if_exists='append')
     # save db engine connection

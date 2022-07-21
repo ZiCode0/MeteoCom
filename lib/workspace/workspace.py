@@ -1,5 +1,4 @@
 import pandas as pd
-from openpyxl import load_workbook
 
 from lib.config import config
 from lib.workspace.export import export
@@ -13,6 +12,7 @@ class Workspace:
         self.report_sheet = conf.default.report_sheet
         self.dataframes = {}
         self.connections = {}
+        self.backup_connection = None
 
     def add_dataframe(self, name: str, initial_data_array: list):
         """
@@ -28,7 +28,7 @@ class Workspace:
 
     def add_row(self, df_name: str, row_object: dict):
         """
-        Add row to pd.dataframe instance.
+        Add row to pd.dataframe instance
         :param df_name: target dataframe
         :param row_object: dictionary to add as row
         :return:
@@ -37,7 +37,7 @@ class Workspace:
         df = pd.DataFrame(row_object, index=[0])
         # append record to task dataframe
         self.dataframes[df_name] = self.dataframes[df_name].append(df, ignore_index=True)
-        # if size is more then 5 rows
+        # if size is more than 5 rows
         if self.dataframes[df_name].shape[0] > self.buffer_size:
             # remove first element to make dataframe size equal to 5 records
             self.dataframes[df_name] = self.dataframes[df_name].iloc[1:]
@@ -53,7 +53,6 @@ class Workspace:
         """
         # get last row record object
         tail = self.dataframes[name].tail(1)
-
         # method: text
         if method == 'text':
             try:
@@ -65,7 +64,7 @@ class Workspace:
         elif method == 'excel':
             sheet_name = self.report_sheet
             start_row = None
-            # try to open excel file by export_path
+            # try to open Excel file by export_path
             try:
                 with pd.ExcelWriter(export_path, engine="openpyxl", mode='a') as writer:
                     # get the last row in the existing Excel sheet
@@ -77,25 +76,27 @@ class Workspace:
                     # append data to existing excel
                     tail.to_excel(writer, startrow=start_row, sheet_name=sheet_name, index=None, header=None)
             except FileNotFoundError:
-                # write new excel file
+                # write new Excel file
                 tail.to_excel(export_path, index=None, sheet_name=sheet_name)
 
         # method: db
-        #
         elif method == 'db':
             # print()
             if name in self.connections:
-                export.to_db(data=tail, engine=self.connections[name])
+                export.to_db(data=tail,
+                             table_name=name,
+                             engine=self.connections[name])
             else:
                 self.connections[name] = export.to_db(data=tail,
-                                                      db_driver=conf.get('DB_DRIVER'),
-                                                      db_host=conf.get('DB_HOST'),
-                                                      db_port=conf.get('DB_PORT'),
-                                                      db_user=conf.get('DB_USER'),
-                                                      db_pass=conf.get('DB_PASS'),
-                                                      db_name=conf.get('DB_NAME'))
+                                                      table_name=name,
+                                                      db_path=conf.get('DB_PATH'))
 
         # method: json
         # export for custom requests
         elif method == 'json':
             return tail.to_dict('records')[0]
+
+    def export_json(self):
+        result_dict = {key: value.to_dict() for (key, value) in self.dataframes.items()}
+
+        return result_dict
