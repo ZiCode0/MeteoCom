@@ -1,0 +1,11 @@
+{"tasks": {
+            "task1": {
+                     "task_type": "read",
+                     "task_line": "{datetime} {temp} {param2} {param3} {param4}",
+                     "task_repeat": 2,
+                     "report_name": "{device_name}_report",
+                     "report_path": ".",
+                     "report_type": "db"
+            }
+    }
+}

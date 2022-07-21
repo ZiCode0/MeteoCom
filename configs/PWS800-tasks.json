@@ -1,0 +1,21 @@
+{"tasks": {
+           "server":{ "task_type": "server" },
+           "task1": {
+                     "enabled": true,
+                     "task_type": "read",
+                     "task_args": "{datetime} {air_temp} {air_press} {air_hum}",
+                     "task_repeat": 10,
+                     "report_name": "{device_name}_{task_name}_{datetime}",
+                     "report_path": "/home/zed/black_hole/test-mc/",
+                     "report_type": "text"
+                    },
+           "task2": {
+                     "enabled": false,
+                     "task_type": "read",
+                     "task_args": "{datetime} {air_press}",
+                     "task_repeat": 10,
+                     "report_name": "{device_name}_{task_name}_{datetime}_report",
+                     "report_path": "/home/zed/black_hole/test-mc/",
+                     "report_type": "text"
+           }
+}}

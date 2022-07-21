@@ -1,0 +1,271 @@
+{
+    "device_mapper": {
+        "info": {
+            "device_name": "MC-01",
+            "protocol": "rtu",
+            "rate": 57600
+        },
+        "data": {
+            "1": {
+                "address": "1:0",
+                "read_type": "default"
+            },
+            "2": {
+                "address": "1:1",
+                "read_type": "default"
+            },
+            "3": {
+                "address": "1:2",
+                "read_type": "default"
+            },
+            "4": {
+                "address": "1:3",
+                "read_type": "default"
+            },
+            "5": {
+                "address": "1:4",
+                "read_type": "default"
+            },
+            "6": {
+                "address": "1:8",
+                "read_type": "default"
+            },
+            "7": {
+                "address": "1:9",
+                "read_type": "default"
+            },
+            "8": {
+                "address": "1:10",
+                "read_type": "default"
+            },
+            "9": {
+                "address": "1:11",
+                "read_type": "default"
+            },
+            "10": {
+                "address": "1:12",
+                "read_type": "default"
+            },
+            "11": {
+                "address": "2:0",
+                "read_type": "default"
+            },
+            "12": {
+                "address": "2:1",
+                "read_type": "default"
+            },
+            "13": {
+                "address": "2:2",
+                "read_type": "default"
+            },
+            "14": {
+                "address": "2:3",
+                "read_type": "default"
+            },
+            "15": {
+                "address": "2:4",
+                "read_type": "default"
+            },
+            "16": {
+                "address": "2:5",
+                "read_type": "default"
+            },
+            "17": {
+                "address": "3:0",
+                "read_type": "default"
+            },
+            "18": {
+                "address": "3:1",
+                "read_type": "default"
+            },
+            "19": {
+                "address": "3:2",
+                "read_type": "default"
+            },
+            "20": {
+                "address": "3:3",
+                "read_type": "default"
+            },
+            "21": {
+                "address": "3:4",
+                "read_type": "default"
+            },
+            "22": {
+                "address": "3:5",
+                "read_type": "default"
+            },
+            "23": {
+                "address": "3:16",
+                "read_type": "default"
+            },
+            "24": {
+                "address": "3:17",
+                "read_type": "default"
+            },
+            "25": {
+                "address": "3:18",
+                "read_type": "default"
+            },
+            "26": {
+                "address": "3:20",
+                "read_type": "default"
+            },
+            "27": {
+                "address": "3:21",
+                "read_type": "default"
+            },
+            "28": {
+                "address": "3:32",
+                "read_type": "float"
+            },
+            "29": {
+                "address": "3:33",
+                "read_type": "float"
+            },
+            "30": {
+                "address": "3:34",
+                "read_type": "float"
+            },
+            "31": {
+                "address": "3:35",
+                "read_type": "float"
+            },
+            "32": {
+                "address": "3:36",
+                "read_type": "default"
+            },
+            "33": {
+                "address": "3:37",
+                "read_type": "default"
+            },
+            "34": {
+                "address": "3:38",
+                "read_type": "default"
+            },
+            "35": {
+                "address": "3:39",
+                "read_type": "default"
+            },
+            "36": {
+                "address": "3:40",
+                "read_type": "default"
+            },
+            "37": {
+                "address": "3:41",
+                "read_type": "default"
+            },
+            "38": {
+                "address": "3:42",
+                "read_type": "default"
+            },
+            "39": {
+                "address": "3:43",
+                "read_type": "default"
+            },
+            "40": {
+                "address": "3:44",
+                "read_type": "default"
+            },
+            "41": {
+                "address": "3:45",
+                "read_type": "default"
+            },
+            "42": {
+                "address": "3:46",
+                "read_type": "default"
+            },
+            "43": {
+                "address": "3:47",
+                "read_type": "default"
+            },
+            "44": {
+                "address": "3:48",
+                "read_type": "default"
+            },
+            "45": {
+                "address": "3:49",
+                "read_type": "default"
+            },
+            "46": {
+                "address": "3:50",
+                "read_type": "default"
+            },
+            "47": {
+                "address": "3:51",
+                "read_type": "default"
+            },
+            "48": {
+                "address": "3:52",
+                "read_type": "default"
+            },
+            "49": {
+                "address": "3:53",
+                "read_type": "default"
+            },
+            "50": {
+                "address": "3:54",
+                "read_type": "default"
+            },
+            "51": {
+                "address": "3:55",
+                "read_type": "default"
+            },
+            "52": {
+                "address": "3:56",
+                "read_type": "default"
+            },
+            "53": {
+                "address": "3:57",
+                "read_type": "default"
+            },
+            "54": {
+                "address": "3:58",
+                "read_type": "default"
+            },
+            "55": {
+                "address": "3:59",
+                "read_type": "default"
+            },
+            "param1": {
+                "address": "4:0",
+                "read_type": "float"
+            },
+            "param2": {
+                "address": "4:1",
+                "read_type": "float"
+            },
+            "param3": {
+                "address": "4:2",
+                "read_type": "float"
+            },
+            "param4": {
+                "address": "4:3",
+                "read_type": "float"
+            },
+            "60": {
+                "address": "4:4",
+                "read_type": "default"
+            },
+            "61": {
+                "address": "4:5",
+                "read_type": "default"
+            },
+            "62": {
+                "address": "4:16",
+                "read_type": "default"
+            },
+            "63": {
+                "address": "4:17",
+                "read_type": "default"
+            },
+            "64": {
+                "address": "4:18",
+                "read_type": "default"
+            },
+            "65": {
+                "address": "4:19",
+                "read_type": "default"
+            }
+        }
+    }
+}
