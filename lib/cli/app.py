@@ -27,8 +27,9 @@ class ConsoleApp:
         parser.add_argument("-m", "--map_path", help="json device map file", default="map.json")
         parser.add_argument("-t", "--task_path", help="json device tasks file", default="tasks+server.json")
         parser.add_argument("-s", "--server", help="enable http server mode only", action="store_true")
-        # parser.add_argument("-d", "--debug", help="enable debug mode to simulate modbus device", action="store_true", default=False)
-        # parser.add_argument("-c", '--configs', help="select configs file", default="default")
+        parser.add_argument("-P", "--parser", help="run parser to generate device map.\n" +
+                                                   f"Example string ({strings.Console.example_parser_args_headers}):\n" +
+                                                   f"{strings.Console.example_parser_args_vars}", default=None)
 
         self.args = parser.parse_args()
         if self.args.version:
