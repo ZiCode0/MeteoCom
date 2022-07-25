@@ -15,7 +15,7 @@ async def get_data(register: str):
     try:
         # prepare input dictionary data
         i_args = {"task_type": "read",
-                  "task_args": "{register}".replace("register", register)}
+                  "task_args": "{datetime} {register}".replace("register", register)}
         # get data
         resp_data = task.get_set_data(args=i_args, once_fail_run=True,
                                       modbus_server=lib.m_server, device_mapper=lib.d_mapper, logger=lib.logger)
@@ -39,7 +39,8 @@ async def set_data(register: str, data: str):
         # TODO: fix get response data / None response - normal?
         resp_data = task.get_set_data(args=i_args, once_fail_run=True,
                                       modbus_server=lib.m_server, device_mapper=lib.d_mapper, logger=lib.logger)
-        return resp_data
+        return await get_data(register=register)
+        # return resp_data
     # return error
     except Exception as ex:
         raise HTTPException(status_code=500, detail=repr(ex))

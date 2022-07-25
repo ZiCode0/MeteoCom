@@ -1,28 +1,34 @@
+import asyncio
+import random
 import time
 
-from minimalmodbus import MODE_RTU, MODE_ASCII, NoResponseError
-from asynciominimalmodbus import AsyncioInstrument
-import random
-
 import serial.serialutil
+from asynciominimalmodbus import AsyncioInstrument
+from minimalmodbus import MODE_RTU, MODE_ASCII, NoResponseError, Instrument
+
+loop = asyncio.get_event_loop()
 
 
 class MServer:
     def __init__(self, port: str, rate: int, read_mode: str, slave_address: int = 1,
-                 extra_options: bool = True, logger=None, fake_connect: bool = False, **kwargs):
+                 extra_options: bool = True, logger=None, fake_connect: bool = False, async_mode=False, **kwargs):
         """
         Modbus mservice instance to read data
         :param port: specify tty port
         :param rate: read rate
         :param read_mode: "rtu" or "ascii"
-        :param extra_options: apply extra mservice extra options
+        :param extra_options: flag to apply extra mservice extra options
+        :param async_mode: flag to enable async instrument mode using asynciominimalmodbus.AsyncioInstrument
         :param fake_connect: toggle and make fake connection to device
         :type logger: logger instance to output info
         """
+        # self.loop = asyncio.get_event_loop()
         self.port = port
         self.rate = rate
         self.read_mode = read_mode
         self.slave_address = slave_address
+
+        self.async_mode = async_mode
         self.fake_connect = fake_connect
 
         self.wait_device_sec_timer = 5
@@ -35,7 +41,10 @@ class MServer:
         if not self.fake_connect:
             def get_engine():
                 try:
-                    engine = AsyncioInstrument(port, slave_address, mode=r_mode[read_mode], **kwargs)
+                    if async_mode:
+                        engine = AsyncioInstrument(port, slave_address, mode=r_mode[read_mode], **kwargs)
+                    else:
+                        engine = Instrument(port, slave_address, mode=r_mode[read_mode], **kwargs)
                     return engine
                 except serial.serialutil.SerialException:
                     s_warning_conn_failed = f'Connection to device "{port}" failed. Waiting {self.wait_device_sec_timer} seconds..'
@@ -47,8 +56,13 @@ class MServer:
             self.engine = get_engine()
             self.engine.serial.baudrate = rate
             if extra_options:
-                self.engine.close_port_after_each_call = True
-                self.engine.clear_buffers_before_each_transaction = True
+                if self.async_mode:
+                    self.engine.instrument.close_port_after_each_call = True
+                    # self.engine.clear_buffers_before_each_transaction = True
+                    self.engine.instrument.clear_buffers_before_each_transaction = True
+                else:
+                    self.engine.close_port_after_each_call = True
+                    self.engine.clear_buffers_before_each_transaction = True
                 # print()  # enable for #debug
         else:
             s_fake_conn_enabled = f'Fake debug connection to device: enabled'
@@ -86,12 +100,13 @@ class MServer:
                           }
         return read_functions[read_type]
 
-    def read_data(self, register, function=0x03, read_type='default'):
+    def read_data(self, register, function=0x03, read_type='default', **kwargs):
         """
         Read data from specified register
         :param register: register number
         :param function: function read number
         :param read_type: default/float/long/bit
+        :param kwargs: additional arguments for reading
         :return:
         """
         # if fake connection
@@ -104,10 +119,8 @@ class MServer:
                           'long': self.engine.read_long,
                           'bit': self.engine.read_bit}
 
-        async def do():
-            return await read_functions[read_type](register, functioncode=function)
-
-        return do()
+        return asyncio.gather(read_functions[read_type](register, functioncode=function, **kwargs)) if self.async_mode \
+            else read_functions[read_type](register, functioncode=function, **kwargs)
 
     def write_data(self, register, new_value, function=16):
         # if fake connection
@@ -117,11 +130,9 @@ class MServer:
         # 'real' write register
         else:
             try:
-                async def do():
-                    response = await self.engine.write_register(registeraddress=register,
-                                                                value=new_value,
-                                                                functioncode=function)
-                    return response
-                return do()
+                return asyncio.gather(self.engine.write_register(
+                    registeraddress=register, value=new_value, functioncode=function)) if self.async_mode \
+                    else self.engine.write_register(registeraddress=register, value=new_value, functioncode=function)
+
             except NoResponseError:
                 return None
