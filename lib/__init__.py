@@ -21,7 +21,7 @@ m_tasker = Union[tsk.Tasker, None]  # None  # tsk.Tasker  # tasker.Tasker
 d_mapper = Union[mapper.DeviceMapper, None]  # mapper.DeviceMapper
 workspace = Union[wks.Workspace, None]  # wks.Workspace
 
-web_server: ws.CWebServer
+web_server: Union[ws.CWebServer, None] = None
 
 
 def start_web_server():
