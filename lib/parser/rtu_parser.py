@@ -15,25 +15,61 @@ index_max = 70  # register scan depth
 skip_empty = True  # skip empty registers
 
 
-def rtu_parser(port=PORT,
-               slave_address=1,
-               rate=RATE,
-               out_path=DEFAULT_PATH,
-               device_name=DEVICE_NAME,
-               read_functions=None,
-               read_mode='rtu',
-               **kwargs):
+def run(args_str: str, logger=None):
+    """
+    Run rtu parser from cli interface
+    :param args_str: target parser string line
+    :param logger: logger instance
+    :return:
+    """
+    # parse args
+    f_args = parse_args(args_string=args_str)
+    # run parser
+    rtu_parser_body(**f_args, logger=logger)
+    # exit
+    sys.exit(0)
+
+
+def parse_args(args_string: str):
+    """
+    Parse rtu parser function target string
+    Example string
+        <PORT>:<RATE>:<NAME>:<RESULT_MAP_PATH>:
+        /dev/tty10:57600:device:./device_map.json
+    :param args_string: target args string
+    :return: dict
+    """
+    args_string = args_string.split(strings.cli_divider)
+    return {
+        'port': args_string[0],
+        'slave_address': int(args_string[1]),
+        'rate': args_string[2],
+        'device_name': args_string[3],
+        'out_path': args_string[4]
+    }
+
+
+def rtu_parser_body(port: str = PORT,
+                    slave_address: int = 1,
+                    rate: int = RATE,
+                    device_name: str = DEVICE_NAME,
+                    out_path: str = DEFAULT_PATH,
+                    read_functions=None,
+                    read_mode='rtu',
+                    logger=None,
+                    **kwargs):
     """
     Modbus parser to build device map
     :param port: target device connection port
     :param slave_address: target slave address to connect device
     :param rate: target device connection rate
-    :param out_path: result output file with json device map
     :param device_name: device name for map
+    :param out_path: result output file with json device map
     :param read_functions: list of read functions
     :param read_mode: modbus mode "rtu"(default)/"ascii"
     :param kwargs: extra arguments for modbus server
     :return: result map view on screen, json out_path map
+    :param logger: logger instance
     """
     # Set up instrument
     if read_functions is None:
@@ -41,7 +77,8 @@ def rtu_parser(port=PORT,
     if out_path is None:
         out_path = DEFAULT_PATH
 
-    s = MServer(port, rate, slave_address=slave_address, read_mode=read_mode, **kwargs)  # init modbus server instance
+    s = MServer(port, rate, read_mode=read_mode, slave_address=slave_address, logger=logger,
+                **kwargs)  # init modbus server instance
 
     # parse registers
     table_buffer = []
@@ -49,20 +86,24 @@ def rtu_parser(port=PORT,
         for index in range(index_max+1):
             try:
                 try:
-                    ss_reg = s.engine.read_register(index, functioncode=func)
-                except:
+                    # sync: s.engine.read_register(index, functioncode=func)
+                    ss_reg = s.read_data(index, function=func, read_type='default')
+                except Exception as ex:
                     ss_reg = ''
                 try:
-                    ss_flt = s.engine.read_float(index, functioncode=func, number_of_registers=2)
-                except:
+                    # sync: s.engine.read_float(index, functioncode=func, number_of_registers=2)
+                    ss_flt = s.read_data(index, function=func, read_type='float')
+                except Exception as ex:
                     ss_flt = ''
                 try:
-                    ss_lng = s.engine.read_long(index, functioncode=func)
-                except:
+                    # sync: s.engine.read_long(index, functioncode=func)
+                    ss_lng = s.read_data(index, function=func, read_type='long')
+                except Exception as ex:
                     ss_lng = ''
                 try:
-                    ss_bit = s.engine.read_bit(index, functioncode=func)
-                except:
+                    # sync: s.engine.read_bit(index, functioncode=func)
+                    ss_bit = s.read_data(index, function=func, read_type='bit')
+                except Exception as ex:
                     ss_bit = ''
 
                 if skip_empty:
@@ -102,8 +143,8 @@ def rtu_parser(port=PORT,
 
 if __name__ == '__main__':
     # sys.args
-    rtu_parser(port=sys.argv[1],
-               slave_address=int(sys.argv[2]),
-               rate=int(sys.argv[3]),
-               device_name=sys.argv[4],
-               out_path=sys.argv[5])
+    rtu_parser_body(port=sys.argv[1],
+                    slave_address=int(sys.argv[2]),
+                    rate=int(sys.argv[3]),
+                    device_name=sys.argv[4],
+                    out_path=sys.argv[5])
