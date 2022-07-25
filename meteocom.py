@@ -25,7 +25,6 @@ def main():
         ca.args.task_path = conf.args.task_path
     if not ca.args.map_path:
         ca.args.map_path = conf.args.map_path
-    fake_connection = bool(int(conf.get('DEBUG')))
 
     # check and start rtu_parser mode
     if ca.args.parser:
@@ -41,7 +40,7 @@ def main():
                                      read_mode=d_mapper.map['info']['protocol'],
                                      slave_address=d_mapper.map['info']['slave_address'],
                                      async_mode=True,
-                                     fake_connect=fake_connection,
+                                     fake_connect=conf.default.debug,
                                      logger=logger)
 
         # start tasks
