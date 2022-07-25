@@ -35,11 +35,8 @@ if __name__ == '__main__':
     # dict_args = simple_input_parser(sys.argv[1:])
     dm = mapper.DeviceMapper()  # init device mapper instance
     dm.read(ca.args.map_path)  # read device mapper configs
-    s = mb_server.MServer(port=target_port,
-                          rate=dm.map['info']['rate'],
-                          read_mode=dm.map['info']['protocol'],
-                          slave_address=dm.map['info']['slave_address'],
-                          fake_connect=True)  # TODO: DEBUG
+    s = mb_server.MServer(port=target_port, rate=dm.map['info']['rate'], read_mode=dm.map['info']['protocol'],
+                          slave_address=dm.map['info']['slave_address'], fake_connect=False)  # TODO: DEBUG
     t = tasker.Tasker(file_path=ca.args.task_path, modbus_server=s, device_mapper=dm)
     t.start()
 
