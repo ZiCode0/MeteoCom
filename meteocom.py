@@ -7,6 +7,7 @@ from lib.tasker import tasker
 from lib.mapping import mapper
 from lib.config import config
 from lib.cli import app as c_app
+from lib.parser import rtu_parser
 
 conf = config.EnvConfig()
 
@@ -26,8 +27,13 @@ def main():
         ca.args.map_path = conf.args.map_path
     fake_connection = bool(int(conf.get('DEBUG')))
 
+    # check and start rtu_parser mode
+    if ca.args.parser:
+        logger.info(strings.Console.program_mode_parser)
+        rtu_parser.run(args_str=ca.args.parser, logger=logger)
+
     # start : normal mode
-    if not ca.args.server:
+    elif not ca.args.server:
         # start program
         d_mapper = mapper.DeviceMapper(ca.args.map_path)  # read device mapper configs
         m_server = mb_server.MServer(port=ca.args.port,
