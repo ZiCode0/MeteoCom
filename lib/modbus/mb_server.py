@@ -1,4 +1,5 @@
 import random
+import threading
 import time
 
 import serial.serialutil
@@ -17,7 +18,6 @@ class MServer:
         :param fake_connect: toggle and make fake connection to device
         :type logger: logger instance to output info
         """
-        # self.loop = asyncio.get_event_loop()
         self.port = port
         self.rate = rate
         self.read_mode = read_mode
@@ -26,7 +26,7 @@ class MServer:
         self.fake_connect = fake_connect
 
         self.wait_device_sec_timer = 5
-        self.locked = False  # locker toggle
+        self.device_lock = threading.Lock()  # locker toggle
         self.logger = logger
         r_mode = {'rtu': MODE_RTU,
                   'ascii': MODE_ASCII}
@@ -104,7 +104,10 @@ class MServer:
                           'long': self.engine.read_long,
                           'bit': self.engine.read_bit}
 
-        return read_functions[read_type](register, functioncode=function, **kwargs)
+        while self.device_lock.locked():
+            continue
+        with self.device_lock:
+            return read_functions[read_type](register, functioncode=function, **kwargs)
 
     def write_data(self, register, new_value, function=16):
         # if fake connection
@@ -114,6 +117,9 @@ class MServer:
         # 'real' write register
         else:
             try:
-                return self.engine.write_register(registeraddress=register, value=new_value, functioncode=function)
+                while self.device_lock.locked():
+                    continue
+                with self.device_lock:
+                    return self.engine.write_register(registeraddress=register, value=new_value, functioncode=function)
             except NoResponseError:
                 return None
