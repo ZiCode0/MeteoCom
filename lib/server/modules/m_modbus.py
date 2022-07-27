@@ -38,7 +38,7 @@ async def create_modbus_server(ims: ModbusServer):
         # get logger instance
         m_server_logger = lib.logger
         # recreate MServer
-        lib.m_server = MServer(logger=m_server_logger, async_mode=True, **ims.dict())
+        lib.m_server = MServer(logger=m_server_logger, **ims.dict())
         # set module var
         # lib.msm = ims
         return await get_modbus_server()  # ims  # lib.msm
@@ -59,7 +59,7 @@ async def modify_modbus_server(update_model: ModbusServer):
         # new model vars dict
         new_model = current_model.copy(update=update_model_dict)
         # set new m_server instance
-        lib.m_server = MServer(logger=m_server_logger, async_mode=True, **new_model.dict())
+        lib.m_server = MServer(logger=m_server_logger, **new_model.dict())
 
         # lib.msm = new_model
         return await get_modbus_server()  # lib.msm

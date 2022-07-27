@@ -39,7 +39,6 @@ def main():
                                      rate=d_mapper.map['info']['rate'],
                                      read_mode=d_mapper.map['info']['protocol'],
                                      slave_address=d_mapper.map['info']['slave_address'],
-                                     async_mode=True,
                                      fake_connect=conf.default.debug,
                                      logger=logger)
 

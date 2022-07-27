@@ -1,24 +1,19 @@
-import asyncio
 import random
 import time
 
 import serial.serialutil
-from asynciominimalmodbus import AsyncioInstrument
 from minimalmodbus import MODE_RTU, MODE_ASCII, NoResponseError, Instrument
-
-loop = asyncio.get_event_loop()
 
 
 class MServer:
     def __init__(self, port: str, rate: int, read_mode: str, slave_address: int = 1,
-                 extra_options: bool = True, logger=None, fake_connect: bool = False, async_mode=False, **kwargs):
+                 extra_options: bool = True, logger=None, fake_connect: bool = False, **kwargs):
         """
         Modbus mservice instance to read data
         :param port: specify tty port
         :param rate: read rate
         :param read_mode: "rtu" or "ascii"
         :param extra_options: flag to apply extra mservice extra options
-        :param async_mode: flag to enable async instrument mode using asynciominimalmodbus.AsyncioInstrument
         :param fake_connect: toggle and make fake connection to device
         :type logger: logger instance to output info
         """
@@ -28,7 +23,6 @@ class MServer:
         self.read_mode = read_mode
         self.slave_address = slave_address
 
-        self.async_mode = async_mode
         self.fake_connect = fake_connect
 
         self.wait_device_sec_timer = 5
@@ -41,11 +35,8 @@ class MServer:
         if not self.fake_connect:
             def get_engine():
                 try:
-                    if async_mode:
-                        engine = AsyncioInstrument(port, slave_address, mode=r_mode[read_mode], **kwargs)
-                    else:
-                        engine = Instrument(port, slave_address, mode=r_mode[read_mode], **kwargs)
-                    return engine
+                    return Instrument(port, slave_address, mode=r_mode[read_mode], **kwargs)
+                # catch serial connection error
                 except serial.serialutil.SerialException:
                     s_warning_conn_failed = f'Connection to device "{port}" failed. Waiting {self.wait_device_sec_timer} seconds..'
                     self.print_debug(s_warning_conn_failed, level='error')
@@ -56,14 +47,8 @@ class MServer:
             self.engine = get_engine()
             self.engine.serial.baudrate = rate
             if extra_options:
-                if self.async_mode:
-                    self.engine.instrument.close_port_after_each_call = True
-                    # self.engine.clear_buffers_before_each_transaction = True
-                    self.engine.instrument.clear_buffers_before_each_transaction = True
-                else:
-                    self.engine.close_port_after_each_call = True
-                    self.engine.clear_buffers_before_each_transaction = True
-                # print()  # enable for #debug
+                self.engine.close_port_after_each_call = True
+                self.engine.clear_buffers_before_each_transaction = True
         else:
             s_fake_conn_enabled = f'Fake debug connection to device: enabled'
             self.print_debug(s_fake_conn_enabled, level='warning')
@@ -119,8 +104,7 @@ class MServer:
                           'long': self.engine.read_long,
                           'bit': self.engine.read_bit}
 
-        return asyncio.gather(read_functions[read_type](register, functioncode=function, **kwargs)) if self.async_mode \
-            else read_functions[read_type](register, functioncode=function, **kwargs)
+        return read_functions[read_type](register, functioncode=function, **kwargs)
 
     def write_data(self, register, new_value, function=16):
         # if fake connection
@@ -130,9 +114,6 @@ class MServer:
         # 'real' write register
         else:
             try:
-                return asyncio.gather(self.engine.write_register(
-                    registeraddress=register, value=new_value, functioncode=function)) if self.async_mode \
-                    else self.engine.write_register(registeraddress=register, value=new_value, functioncode=function)
-
+                return self.engine.write_register(registeraddress=register, value=new_value, functioncode=function)
             except NoResponseError:
                 return None
