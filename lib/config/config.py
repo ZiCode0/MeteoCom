@@ -41,8 +41,7 @@ class EnvConfig:
                                                                    default=5)),
                                report_sheet=str(os.environ.get("REPORT_SHEET",
                                                                default="report")),
-                               debug=bool(strtobool(os.environ.get("DEBUG",
-                                                                   default=False)))
+                               debug=bool(strtobool(os.environ.get("DEBUG", default='False')))
                                )
 
         # set cli args
